@@ -1,36 +1,36 @@
 const { Router } = require("express");
-const { userModel } =require("../db");
+const { userModel, purchaseModel, courseModel } = require("../db");
 const jwt = require("jsonwebtoken");
-const { JWT_USER_PASSWORD } = require("../config");
+const  { JWT_USER_PASSWORD } = require("../config");
+const { userMiddleware } = require("../middleware/user");
 
 const userRouter = Router();
 
 userRouter.post("/signup", async function(req, res) {
-    const {email, password , firstName, lastName } = req.body;
-    
-    
+    const { email, password, firstName, lastName } = req.body; 
+
     await userModel.create({
         email: email,
         password: password,
-        firstName,
-        lastName
-
+        firstName: firstName, 
+        lastName: lastName
     })
+    
     res.json({
         message: "Signup succeeded"
     })
 })
 
-userRouter.post("/signin", async function(req, res) {
-    const { email, password } = req.body;
+userRouter.post("/signin",async function(req, res) {
+    const { email, password } = req.body;
 
     const user = await userModel.findOne({
         email: email,
         password: password
-    });
+    }); 
 
     if (user) {
-        jwt.sign ({
+        const token = jwt.sign({
             id: user._id,
         }, JWT_USER_PASSWORD);
 
@@ -38,15 +38,32 @@ userRouter.post("/signin", async function(req, res) {
             token: token
         })
     } else {
-        res.json({
-        message: "Incorrect credentials"
-    })
-}}
-)
+        res.status(403).json({
+            message: "Incorrect credentials"
+        })
+    }
+})
 
-userRouter.get("/purchases", function(req, res) {
+userRouter.get("/purchases", userMiddleware, async function(req, res) {
+    const userId = req.userId;
+
+    const purchases = await purchaseModel.find({
+        userId,
+    });
+
+    let purchasedCourseIds = [];
+
+    for (let i = 0; i<purchases.length;i++){ 
+        purchasedCourseIds.push(purchases[i].courseId)
+    }
+
+    const coursesData = await courseModel.find({
+        _id: { $in: purchasedCourseIds }
+    })
+
     res.json({
-        message: "signup endpoint"
+        purchases,
+        coursesData
     })
 })
 
