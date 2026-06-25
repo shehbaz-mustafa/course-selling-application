@@ -17,7 +17,11 @@ function userMiddleware(req, res, next) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
  module.exports ={
+=======
+module.exports = {
+>>>>>>> 8c98ffa9152af826e812d72c7a8b192fe67471f0
 =======
 module.exports = {
 >>>>>>> 8c98ffa9152af826e812d72c7a8b192fe67471f0

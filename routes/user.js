@@ -1,6 +1,10 @@
 const { Router } = require("express");
 <<<<<<< HEAD
+<<<<<<< HEAD
 const { prisma } = require("../db");
+=======
+const { userModel, purchaseModel, courseModel } = require("../db");
+>>>>>>> 8c98ffa9152af826e812d72c7a8b192fe67471f0
 =======
 const { userModel, purchaseModel, courseModel } = require("../db");
 >>>>>>> 8c98ffa9152af826e812d72c7a8b192fe67471f0
@@ -11,6 +15,7 @@ const { userMiddleware } = require("../middleware/user");
 const userRouter = Router();
 
 userRouter.post("/signup", async function(req, res) {
+<<<<<<< HEAD
 <<<<<<< HEAD
     const {email, password , firstName, lastName } = req.body;
     
@@ -33,6 +38,8 @@ userRouter.post("/signup", async function(req, res) {
         });
     }
 =======
+=======
+>>>>>>> 8c98ffa9152af826e812d72c7a8b192fe67471f0
     const { email, password, firstName, lastName } = req.body; 
 
     await userModel.create({
@@ -52,6 +59,7 @@ userRouter.post("/signin",async function(req, res) {
     const { email, password } = req.body;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     const user = await prisma.user.findFirst({
         where: {
             email: email,
@@ -69,6 +77,14 @@ userRouter.post("/signin",async function(req, res) {
     }); 
 
     if (user) {
+=======
+    const user = await userModel.findOne({
+        email: email,
+        password: password
+    }); 
+
+    if (user) {
+>>>>>>> 8c98ffa9152af826e812d72c7a8b192fe67471f0
         const token = jwt.sign({
             id: user._id,
 >>>>>>> 8c98ffa9152af826e812d72c7a8b192fe67471f0
@@ -81,10 +97,13 @@ userRouter.post("/signin",async function(req, res) {
         res.status(403).json({
             message: "Incorrect credentials"
 <<<<<<< HEAD
+<<<<<<< HEAD
         });
     }
 })
 =======
+=======
+>>>>>>> 8c98ffa9152af826e812d72c7a8b192fe67471f0
         })
     }
 })
@@ -105,6 +124,9 @@ userRouter.get("/purchases", userMiddleware, async function(req, res) {
     const coursesData = await courseModel.find({
         _id: { $in: purchasedCourseIds }
     })
+<<<<<<< HEAD
+>>>>>>> 8c98ffa9152af826e812d72c7a8b192fe67471f0
+=======
 >>>>>>> 8c98ffa9152af826e812d72c7a8b192fe67471f0
 
     res.json({
