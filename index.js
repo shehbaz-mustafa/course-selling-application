@@ -1,7 +1,6 @@
 require('dotenv').config()
-console.log(process.env.MONGO_URL)
 const express = require("express");
-const mongoose = require("mongoose")
+const { prisma } = require("./db");
 
 const { userRouter } = require("./routes/user");
 const { courseRouter } = require("./routes/course");
@@ -15,7 +14,8 @@ app.use("/api/v1/course", courseRouter);
 
 
 async function main (){
-    await mongoose.connect(process.env.MONGO_URL)
+    await prisma.$connect();
+    console.log("Connected to PostgreSQL database via Prisma client");
     app.listen(3000);
     console.log("listening on port 3000")
 }

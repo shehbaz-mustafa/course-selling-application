@@ -1,38 +1,47 @@
 const { Router } = require("express");
 const adminRouter = Router();
-const { adminModel, courseModel } = require("../db"); // FIX: Added courseModel import
+const { prisma } = require("../db");
 const jwt = require ("jsonwebtoken");  
  
 const { JWT_ADMIN_PASSWORD } = require("../config");
 const { adminMiddleware } = require("../middleware/admin");
 
 adminRouter.post("/signup", async function(req, res) {
-      const {email, password , firstName, lastName } = req.body;
+    const {email, password , firstName, lastName } = req.body;
     
-     await adminModel.create({
-        email: email,
-        password: password,
-        firstName,
-        lastName
-
-    })
-    res.json({
-        message: "Signup succeeded"
-    })
+    try {
+        await prisma.admin.create({
+            data: {
+                email: email,
+                password: password,
+                firstName: firstName,
+                lastName: lastName
+            }
+        });
+        res.json({
+            message: "Signup succeeded"
+        });
+    } catch (e) {
+        res.status(400).json({
+            message: "Signup failed",
+            error: e.message
+        });
+    }
 })
 
 adminRouter.post("/signin", async function(req, res) {
     const { email, password } = req.body;
 
-    const admin = await adminModel.findOne({
-        email: email,
-        password: password
+    const admin = await prisma.admin.findFirst({
+        where: {
+            email: email,
+            password: password
+        }
     });
 
     if (admin) {
-        // FIX: Use JWT_ADMIN_PASSWORD and assign token
         const token = jwt.sign(
-            { id: admin._id },
+            { id: admin.id },
             JWT_ADMIN_PASSWORD
         );
 
@@ -40,30 +49,37 @@ adminRouter.post("/signin", async function(req, res) {
             token: token
         });
     } else {
-        res.json({
+        res.status(403).json({
             message: "Incorrect credentials"
         });
     }
-
 })
 
 adminRouter.post("/course", adminMiddleware, async function(req, res) {
     const adminId = req.userId;
-
     const {title, description, imageUrl ,price} = req.body;
 
-    const course = await courseModel.create({
-        title: title, 
-        description : description,
-        imageUrl: imageUrl,
-        price: price,
-        creatorId: adminId
-    })
+    try {
+        const course = await prisma.course.create({
+            data: {
+                title: title, 
+                description: description,
+                imageUrl: imageUrl,
+                price: parseFloat(price),
+                creatorId: adminId
+            }
+        });
 
-    res.json({
-        message: "Course created",
-        courseId: course ._id
-    })
+        res.json({
+            message: "Course created",
+            courseId: course.id
+        });
+    } catch (e) {
+        res.status(400).json({
+            message: "Failed to create course",
+            error: e.message
+        });
+    }
 })
 
 adminRouter.put("/course", function(req, res) {
